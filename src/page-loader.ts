@@ -1,36 +1,49 @@
 import { Page } from 'puppeteer';
-import { log, sleep } from './utils';
+import { getRandom, log, sleep } from './utils';
 import { waitForContentLoading } from './browser.utils';
 import { isNil } from 'lodash-es';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { openSliderPanel } from './more-reader-to-start';
+import { BookPage, Footnote } from './shared/types';
 
 /**
  * Получает информацию о странице.
  */
 export async function getPaginationDescriptor(page: Page) {
-  const paginationDescriptor = await page.evaluate(() => {
-    const pageContentEl = document.querySelector<HTMLDivElement>('div#TEXTS_CONTAINER_WRAPPER');
-    if (!pageContentEl) {
+  const paginationDescriptor: BookPage | null = await page.evaluate(() => {
+    const pageContainerEl = document.querySelector<HTMLDivElement>('div#TEXTS_CONTAINER_WRAPPER');
+    if (!pageContainerEl) {
       return null;
     }
 
-    const contentEl = pageContentEl.querySelector<HTMLElement>('r-chapter-horizontal');
-    if (!contentEl) {
+    const contentContainerEl = pageContainerEl.querySelector<HTMLElement>('r-chapter-horizontal');
+    if (!contentContainerEl) {
       return null;
     }
 
-    const imgTags = contentEl.querySelectorAll('img');
+    const imgTags = contentContainerEl.querySelectorAll('img');
     const images = [...imgTags].map((imgTags) => {
       return imgTags.getAttribute('src') || '';
     });
 
+    const footnotes: Footnote[] = [];
+    const footnoteEls = contentContainerEl.querySelectorAll<HTMLElement>('.footnote-content');
+    for (const footnoteEl of footnoteEls ?? []) {
+      footnotes.push({
+        id: footnoteEl.id,
+        text: footnoteEl.innerText.trim(),
+      });
+    }
+
+    const contentEl = contentContainerEl.querySelector('.section1');
+
     return {
-      id: contentEl.id,
-      page: Number(contentEl.dataset.pageIndex),
-      transform: pageContentEl.style.transform,
-      content: contentEl.innerHTML,
+      id: contentContainerEl.id,
+      page: Number(contentContainerEl.dataset.pageIndex),
+      transform: pageContainerEl.style.transform,
+      content: contentEl?.innerHTML ?? '',
+      footnotes,
       images: images.filter(Boolean),
     };
   });
@@ -44,7 +57,9 @@ export async function getPaginationDescriptor(page: Page) {
 export async function clickNextPage(page: Page) {
   // Запутывание бан-системы
   const viewport = page.viewport() || { width: 1920, height: 1080 };
-  await page.mouse.move(viewport.width * 0.5, viewport.height * 0.5, { steps: 7 });
+  const randomXCoeff = getRandom(0.4, 0.6);
+  const randomYCoeff = getRandom(0.4, 0.6);
+  await page.mouse.move(viewport.width * randomXCoeff, viewport.height * randomYCoeff, { steps: 7 });
   await sleep(350);
   await page.mouse.down();
   await sleep(150);
@@ -116,9 +131,8 @@ export async function loadBookPages(bookId: string, page: Page) {
     return;
   }
 
-  let bookContent = '';
-
   const imagesSet = new Set<string>();
+  const pages = [];
 
   const loadedPagesSet = new Map<string, string>();
   while (true) {
@@ -126,7 +140,7 @@ export async function loadBookPages(bookId: string, page: Page) {
 
     // Сохраняем новый контент
     if (!loadedPagesSet.has(lastPagination.id)) {
-      bookContent += lastPagination.content;
+      pages.push(lastPagination);
 
       for (const imgSrc of lastPagination.images) {
         imagesSet.add(imgSrc);
@@ -172,6 +186,8 @@ export async function loadBookPages(bookId: string, page: Page) {
   for (const imgSrc of images) {
     log(`Перевод ссылки в base64: ${imgSrc}`);
 
+    await sleep(200);
+
     const imgBase64 = await page.evaluate(async (imgSrc) => {
       try {
         const response = await fetch(imgSrc);
@@ -189,11 +205,13 @@ export async function loadBookPages(bookId: string, page: Page) {
     }, imgSrc);
 
     if (!isNil(imgBase64)) {
-      bookContent = bookContent.replace(imgSrc, imgBase64);
+      for (const page of pages) {
+        page.content = page.content.replace(imgSrc, imgBase64);
+      }
     }
   }
 
-  log(`Сохранение содержимого в HTML файл.`);
-  await saveContentToFile(bookId, `content.html`, bookContent);
-  return bookContent;
+  log(`Сохранение страниц книги в JSON файл.`);
+  await saveContentToFile(bookId, `pages.json`, JSON.stringify(pages, null, 2));
+  return pages;
 }

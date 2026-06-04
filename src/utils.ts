@@ -23,3 +23,17 @@ export function sleep(duration: DurationWithMilliseconds | number) {
 export function log(...rest: any) {
   console.log(`[${format(new Date(), 'HH:mm:ss')}]:`, ...rest);
 }
+
+/**
+ * Возвращает случайное число в указанных границах.
+ */
+export function getRandom(min: number, max: number) {
+  return Math.random() * (max - min) + min;
+}
+
+/**
+ * Returns random integer.
+ */
+export function genRandomInt(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min)) + min;
+}

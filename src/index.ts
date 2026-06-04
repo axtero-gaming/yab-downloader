@@ -1,6 +1,6 @@
 import { milliseconds } from 'date-fns';
 import puppeteer from 'puppeteer';
-import { isEmpty } from 'lodash-es';
+import { isEmpty, isNil } from 'lodash-es';
 import path from 'node:path';
 
 import { log, sleep } from './utils';
@@ -9,6 +9,7 @@ import { openReader } from './open-reader';
 import { moveReaderToStart } from './more-reader-to-start';
 import { loadCookies, saveCookies } from './browser.utils';
 import { loadBookPages } from './page-loader';
+import { buildHTMLBookFile } from './html-book-builder';
 
 const COOKIES_FILE_NAME = 'cookies_session.json';
 
@@ -59,7 +60,10 @@ const bookId = bookLink.split('/').slice(-1)[0];
 // Установка ридера в 0ю страницу.
 await moveReaderToStart(page);
 
-await loadBookPages(bookId, page);
+const pages = await loadBookPages(bookId, page);
+if (!isNil(pages)) {
+  buildHTMLBookFile(bookId, pages);
+}
 
 log(`Закрытие браузера`);
 await browser.close();

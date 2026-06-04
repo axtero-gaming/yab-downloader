@@ -1,0 +1,415 @@
+.bookContent {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  -moz-column-fill: auto;
+  font-feature-settings: oldstyle-nums proportional-nums;
+  font-variant-numeric: oldstyle-nums proportional-nums;
+  will-change: transform;
+  -webkit-touch-callout: none;
+  column-fill: auto;
+
+  line-height: 1.4;
+  font-size: 18px;
+  text-align: left;
+  hyphens: auto;
+}
+
+.bookContent ::selection {
+  background: var(--theme-focus);
+}
+
+.bookContent ::-moz-selection {
+  background: var(--theme-focus);
+}
+
+.bookContent:focus {
+  outline: 0;
+}
+
+.bookContent caption,
+.bookContent dt,
+.bookContent h2,
+.bookContent h3,
+.bookContent h4,
+.bookContent h5,
+.bookContent h6,
+.bookContent hr {
+  page-break-after: avoid;
+  -moz-column-break-after: avoid;
+  break-after: avoid;
+}
+
+.bookContent dt,
+.bookContent figure,
+.bookContent h1,
+.bookContent h2,
+.bookContent h3,
+.bookContent h4,
+.bookContent h5,
+.bookContent h6,
+.bookContent tr {
+  page-break-inside: avoid;
+  -moz-column-break-inside: avoid;
+  break-inside: avoid;
+}
+
+.bookContent address,
+.bookContent caption,
+.bookContent center,
+.bookContent code,
+.bookContent dt,
+.bookContent figcaption,
+.bookContent h1,
+.bookContent h2,
+.bookContent h3,
+.bookContent h4,
+.bookContent h5,
+.bookContent h6,
+.bookContent pre,
+.bookContent var {
+  hyphens: none;
+}
+
+.bookContent dt,
+.bookContent h1,
+.bookContent h2,
+.bookContent h3,
+.bookContent h4,
+.bookContent h5,
+.bookContent h6 {
+  font-feature-settings: lining-nums proportional-nums;
+  font-variant-numeric: lining-nums proportional-nums;
+}
+
+.bookContent table {
+  width: 100%;
+  table-layout: fixed;
+  font-feature-settings: lining-nums tabular-nums;
+  font-variant-numeric: lining-nums tabular-nums;
+  overflow-x: hidden;
+}
+
+.bookContent tr {
+  page-break-after: avoid;
+  -moz-column-break-after: avoid;
+  break-after: avoid;
+}
+
+.bookContent var,
+.bookContent code {
+  font-feature-settings:
+    none,
+    lining-nums tabular-nums slashed-zero;
+  font-variant-ligatures: none;
+  font-variant-numeric: lining-nums tabular-nums slashed-zero;
+}
+
+.bookContent rt {
+  font-variant-east-asian: ruby;
+}
+
+.bookContent abbr[title],
+.bookContent acronym[title] {
+  -webkit-text-decoration: dotted underline;
+  text-decoration: dotted underline;
+}
+
+.bookContent nobr wbr {
+  white-space: normal;
+}
+
+.bookContent img {
+  display: block;
+  margin: 0 auto;
+  background: var(--theme-menu-bg);
+}
+
+.bookContent * {
+  font-family: inherit;
+  line-height: inherit;
+}
+
+.bookContent::-webkit-scrollbar {
+  display: none;
+}
+
+.bookContent a,
+.bookContent cite,
+.bookContent h1,
+.bookContent h2,
+.bookContent h3,
+.bookContent h4,
+.bookContent p,
+.bookContent span {
+  word-wrap: break-word;
+  margin: 0;
+}
+
+.bookContent blockquote {
+  margin: 1em 0 1em 2em;
+  padding: 0;
+}
+
+.bookContent blockquote p {
+  hanging-punctuation: first;
+}
+
+.bookContent p + p {
+  text-indent: 2em;
+}
+
+.bookContent blockquote p + p,
+.bookContent br + p {
+  text-indent: 0;
+}
+
+.bookContent h1,
+.bookContent h2,
+.bookContent h3,
+.bookContent h4,
+.bookContent h5,
+.bookContent h6 {
+  text-align: center;
+  margin-bottom: 0.5em;
+  font-size: 100%;
+  margin-top: 1em;
+  font-weight: 400;
+}
+
+.bookContent h1:first-child,
+.bookContent h2:first-child,
+.bookContent h3:first-child,
+.bookContent h4:first-child,
+.bookContent h5:first-child,
+.bookContent h6:first-child {
+  margin-top: 0;
+}
+
+.bookContent h1 {
+  margin-bottom: 1em;
+}
+
+.bookContent h2 {
+  margin-bottom: 0.5em;
+}
+
+.bookContent h1 {
+  font-size: 150%;
+}
+
+.bookContent h2 {
+  font-size: 140%;
+}
+
+.bookContent h3 {
+  font-size: 120%;
+}
+
+.bookContent h4 {
+  font-size: 110%;
+}
+
+.bookContent h5 {
+  font-size: 105%;
+}
+
+.bookContent h1 + h1 {
+  font-size: 130%;
+  margin-top: -0.6em;
+}
+
+.bookContent br + h2 {
+  margin-top: 0;
+}
+
+.bookContent .HorizontalTextElement_image__Dgefr {
+  background-color: var(--theme-elements50);
+}
+
+.bookContent h1 p,
+.bookContent h2 p,
+.bookContent h3 p,
+.bookContent h4 p,
+.bookContent h5 p,
+.bookContent h6 p {
+  text-indent: 0;
+}
+
+.bookContent sup {
+  color: #7e7e7e;
+}
+
+.bookContent a {
+  color: var(--theme-action);
+}
+
+.bookContent sup a {
+  color: var(--theme-action);
+  text-decoration: none;
+}
+
+.bookContent ol,
+.bookContent ul {
+  padding-left: 40px;
+  margin: 0.8em 0;
+  font-size: 90%;
+}
+
+.bookContent ol ol,
+.bookContent ol ul,
+.bookContent ul ol,
+.bookContent ul ul {
+  font-size: 100%;
+}
+
+.bookContent ul,
+.bookContent ul li {
+  list-style: none;
+}
+
+.bookContent ul li {
+  padding-left: 1em;
+}
+
+.bookContent ul li:before {
+  content: '– ';
+  display: inline-block;
+  margin-left: -1em;
+}
+
+.bookContent ol,
+.bookContent ol li {
+  list-style: decimal outside;
+}
+
+.bookContent pre {
+  white-space: pre-wrap;
+  font-size: 75%;
+  padding-left: 20px;
+  -moz-tab-size: 2;
+  -o-tab-size: 2;
+  tab-size: 2;
+}
+
+.bookContent code,
+.bookContent pre {
+  font-family:
+    Courier New,
+    Courier,
+    monospace;
+}
+
+.bookContent code {
+  font-size: 90%;
+  color: #c4244d;
+  background-color: #f5eef0;
+  padding: 2px 4px;
+}
+
+.bookContent a > code {
+  color: inherit;
+}
+
+.bookContent pre > code {
+  font-size: inherit;
+  color: inherit;
+  background-color: inherit;
+  padding: 0;
+}
+
+:root {
+  color-scheme: light dark;
+  --plus-gradient: linear-gradient(90deg, #ff5c4d, #eb469f 26.56%, #8341ef 75%, #3f68f9);
+  --quote-color-one-static: #ffd675;
+  --quote-color-two-static: #ff8676;
+  --quote-color-three-static: #86e1ff;
+  --quote-color-four-static: #75f1da;
+  --quote-color-five-static: #d3d3d3;
+  --actions-primary: #2d2d2d;
+  --actions-button-bg: #e9e9e9;
+  --text-secondary: #747272;
+  --text-disabled: #a7a7a7;
+  --actions-accent-hover: #ff3554;
+  --text-disabled-hover: rgba(255, 93, 93, 0.5);
+  --quote-color-one: #ffd675;
+  --quote-color-two: #ff8676;
+  --quote-color-three: #86e1ff;
+  --quote-color-four: #75f1da;
+  --quote-color-five: #d3d3d3;
+  --theme-bg: #ffffff;
+  --theme-menu-bg: #eaeaea;
+  --theme-elements: #2d2d2d;
+  --theme-elements50: rgba(45, 45, 45, 0.5);
+  --theme-elements20: rgba(45, 45, 45, 0.2);
+  --theme-elements5: rgba(45, 45, 45, 0.05);
+  --theme-action: #2d2d2d;
+  --theme-action-text: #fff;
+  --theme-focus: var(--quote-color-one);
+  --theme-bg-rgb: 255, 255, 255;
+}
+
+html {
+  font-size: 100%;
+  text-rendering: optimizeLegibility;
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+a:focus {
+  outline: thin dotted #333;
+  outline: 5px auto -webkit-focus-ring-color;
+}
+
+a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+body {
+  font-family: var(--ystext);
+}
+
+button {
+  padding: 0;
+  margin: 0;
+  background: none;
+  border: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+body {
+  touch-action: pan-x pan-y;
+  background-color: var(--theme-bg) !important;
+}
+
+body::backdrop {
+  background-color: var(--theme-bg);
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  margin: 0;
+  padding: 0;
+  -webkit-overflow-scrolling: touch;
+  overflow-x: hidden;
+  overscroll-behavior: none;
+}
+
+.embed-element {
+  position: relative;
+}
+
+.reader-image {
+  page-break-inside: avoid;
+}

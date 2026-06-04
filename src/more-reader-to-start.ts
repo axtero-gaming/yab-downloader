@@ -1,5 +1,5 @@
 import { Page } from 'puppeteer';
-import { sleep } from './utils';
+import { getRandom, sleep } from './utils';
 import { isNil } from 'lodash-es';
 
 /**
@@ -7,7 +7,10 @@ import { isNil } from 'lodash-es';
  */
 export async function openSliderPanel(page: Page) {
   const viewport = page.viewport() || { width: 1920, height: 1080 };
-  await page.mouse.move(viewport.width * 0.5, viewport.height * 0.9, { steps: 6 });
+
+  const randomXCoeff = getRandom(0.4, 0.6);
+  const randomYCoeff = getRandom(0.9, 0.91);
+  await page.mouse.move(viewport.width * randomXCoeff, viewport.height * randomYCoeff, { steps: 6 });
   await sleep(200);
   await page.mouse.click(viewport.width * 0.5, viewport.height * 0.95);
   await sleep(200);
