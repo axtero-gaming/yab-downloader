@@ -1,11 +1,13 @@
 import { Page } from 'puppeteer';
-import { getRandom, log, sleep } from './utils';
+import { buildBookFolderPath, getRandom, log, sleep } from './utils';
 import { waitForContentLoading } from './browser.utils';
 import { isNil } from 'lodash-es';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { openSliderPanel } from './more-reader-to-start';
 import { BookPage, Footnote } from './shared/types';
+
+let imageIndex = 0;
 
 /**
  * Получает информацию о странице.
@@ -36,7 +38,11 @@ export async function getPaginationDescriptor(page: Page) {
       });
     }
 
-    const contentEl = contentContainerEl.querySelector('.section1');
+    const contentEl = contentContainerEl.cloneNode(true) as HTMLElement;
+    const footnotesEl = contentEl.querySelector('.footnotes');
+    if (footnotesEl) {
+      footnotesEl.remove();
+    }
 
     return {
       id: contentContainerEl.id,
@@ -102,7 +108,7 @@ export async function clickNextPage(page: Page) {
   }
 
   await waitForContentLoading(page, { seconds: 2.5 });
-  await sleep(3500);
+  await sleep(2500);
 
   // Эмуляция попытки скрллинга страницы после выгрузки
   await page.evaluate(() => {
@@ -116,10 +122,37 @@ export async function clickNextPage(page: Page) {
  * Сохраняет содержимое файла в папку книги.
  */
 async function saveContentToFile(bookId: string, fileName: string, content: string) {
-  const bookPath = path.resolve(path.dirname(`.`), 'downloads', bookId);
+  const bookPath = buildBookFolderPath(bookId);
   const filePath = path.resolve(bookPath, fileName);
   await fs.mkdir(bookPath, { recursive: true });
   await fs.writeFile(filePath, content, 'utf8');
+}
+
+/**
+ * Переводит изображения в Base64 формате в файл.
+ */
+async function saveBase64Image(bookId: string, base64Image: string, fileName: string) {
+  // Удаляем префикс и получаем тип файла
+  const matches = base64Image.match(/^data:image\/(\w+);base64,(.+)$/);
+  if (isNil(matches)) {
+    console.log(`Неопознанный формат изображения`);
+    return;
+  }
+
+  const imageType = matches[1]; // 'jpeg', 'png', 'gif' и т.д.
+  const base64Data = matches[2];
+
+  // Конвертируем в Buffer
+  const imageBuffer = Buffer.from(base64Data, 'base64');
+
+  const bookImagesPath = path.resolve(buildBookFolderPath(bookId), 'images');
+  const filePath = path.resolve(bookImagesPath, `${fileName}.${imageType}`);
+
+  // Сохраняем с правильным расширением
+  await fs.mkdir(bookImagesPath, { recursive: true });
+  await fs.writeFile(filePath, imageBuffer);
+  console.log(`Изображение сохранено как: ${filePath}`);
+  return filePath;
 }
 
 /**
@@ -136,8 +169,6 @@ export async function loadBookPages(bookId: string, page: Page) {
 
   const loadedPagesSet = new Map<string, string>();
   while (true) {
-    await sleep(2500);
-
     // Сохраняем новый контент
     if (!loadedPagesSet.has(lastPagination.id)) {
       pages.push(lastPagination);
@@ -205,8 +236,12 @@ export async function loadBookPages(bookId: string, page: Page) {
     }, imgSrc);
 
     if (!isNil(imgBase64)) {
+      const imagePath = await saveBase64Image(bookId, imgBase64, `img-${imageIndex++}`);
       for (const page of pages) {
-        page.content = page.content.replace(imgSrc, imgBase64);
+        if (!isNil(imagePath)) {
+          page.content = `${page.content}`.replace(imgSrc, `file://${imagePath}`);
+        }
+        page.contentWithBase64 = `${page.content}`.replace(imgSrc, imgBase64);
       }
     }
   }

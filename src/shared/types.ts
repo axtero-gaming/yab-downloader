@@ -8,6 +8,7 @@ export interface BookPage {
   page: number;
   transform: string;
   content: string;
+  contentWithBase64?: string;
   footnotes: Footnote[];
   images: string[];
 }

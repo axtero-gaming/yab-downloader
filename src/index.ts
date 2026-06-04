@@ -2,14 +2,15 @@ import { milliseconds } from 'date-fns';
 import puppeteer from 'puppeteer';
 import { isEmpty, isNil } from 'lodash-es';
 import path from 'node:path';
+import fs from 'node:fs/promises';
 
-import { log, sleep } from './utils';
+import { buildBookFolderPath, log, sleep } from './utils';
 import { waitForAuth } from './auth';
 import { openReader } from './open-reader';
 import { moveReaderToStart } from './more-reader-to-start';
 import { loadCookies, saveCookies } from './browser.utils';
 import { loadBookPages } from './page-loader';
-import { buildHTMLBookFile } from './html-book-builder';
+import { buildEpubBookFile, buildHTMLBookFile } from './book-file-builder';
 
 const COOKIES_FILE_NAME = 'cookies_session.json';
 
@@ -56,13 +57,15 @@ await browser.waitForTarget((target) => target.url().startsWith('https://books.y
 await sleep({ seconds: 1 });
 
 const bookId = bookLink.split('/').slice(-1)[0];
+await fs.rm(buildBookFolderPath(bookId), { recursive: true });
 
 // Установка ридера в 0ю страницу.
 await moveReaderToStart(page);
 
 const pages = await loadBookPages(bookId, page);
 if (!isNil(pages)) {
-  buildHTMLBookFile(bookId, pages);
+  await buildHTMLBookFile(bookId, pages);
+  await buildEpubBookFile(bookId, pages);
 }
 
 log(`Закрытие браузера`);

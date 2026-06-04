@@ -1,5 +1,6 @@
 import { Duration, format, milliseconds } from 'date-fns';
 import { isNil, isNumber } from 'lodash-es';
+import path from 'node:path';
 
 export interface DurationWithMilliseconds extends Duration {
   milliseconds?: number;
@@ -36,4 +37,9 @@ export function getRandom(min: number, max: number) {
  */
 export function genRandomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min)) + min;
+}
+
+export function buildBookFolderPath(bookId: string) {
+  const bookPath = path.resolve(path.dirname(`.`), 'downloads', bookId);
+  return bookPath;
 }
