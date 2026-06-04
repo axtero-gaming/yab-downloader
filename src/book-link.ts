@@ -35,7 +35,7 @@ export async function waitForBookLink(context: BrowserContext, page: Page) {
 
     const bookLink = await getBookLink(context, page);
     if (!isNil(bookLink)) {
-      log('✓ Ссылка на книгу получена:', bookLink);
+      log('✅ Ссылка на книгу получена:', bookLink);
       return bookLink;
     }
 
@@ -45,5 +45,5 @@ export async function waitForBookLink(context: BrowserContext, page: Page) {
     }
   }
 
-  throw new Error(`Таймаут ожидания ссылки на страницу книги`);
+  throw new Error(`❌ Таймаут ожидания ссылки на страницу книги`);
 }

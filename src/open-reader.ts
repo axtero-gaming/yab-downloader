@@ -8,6 +8,7 @@ import { milliseconds } from 'date-fns';
  */
 export async function openReader(bookLink: string, page: Page) {
   log(`Открываю страницу книги`, bookLink);
+  await sleep({ seconds: 2 });
   await page.goto(bookLink, { waitUntil: 'domcontentloaded', timeout: milliseconds({ seconds: 30 }) });
 
   const dimensions = await page.evaluate(() => {
@@ -17,6 +18,8 @@ export async function openReader(bookLink: string, page: Page) {
     };
   });
   page.setViewport({ width: 1020, height: dimensions.height });
+
+  await sleep({ seconds: 1 });
 
   log('Пробую открыть режим чтения (читатель)...');
   const openReaderSelectors = [
@@ -36,12 +39,14 @@ export async function openReader(bookLink: string, page: Page) {
         continue;
       }
 
+      log(`Найден элемент для открытия чтения: ${selector}`);
+
       if (await el.isVisible()) {
         await el.scrollIntoView();
         await sleep(250);
         await el.click();
         readerOpened = true;
-        log(`Найден элемент для открытия чтения: ${selector}`);
+        log(`Клик на кнопку Читать`);
         break;
       }
     } catch (err) {
@@ -65,7 +70,7 @@ export async function openReader(bookLink: string, page: Page) {
         readerOpened = true;
       }
     } catch (err) {
-      throw new Error(`⚠ Не удалось открыть ридер по URL`);
+      throw new Error(`❌ Не удалось открыть ридер по URL`);
     }
   }
 }

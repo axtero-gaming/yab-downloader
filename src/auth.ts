@@ -50,7 +50,7 @@ export async function waitForAuth(browser: Browser, page: Page) {
   await sleep({ seconds: 2 });
 
   if (await checkAuth(browser, page)) {
-    log(`✓ Вы уже авторизованы`);
+    log(`✅ Вы уже авторизованы`);
     return true;
   }
   log(`Ожидание авторизации`);
@@ -63,7 +63,7 @@ export async function waitForAuth(browser: Browser, page: Page) {
     checkCount++;
 
     if (await checkAuth(browser, page)) {
-      log('✓ Авторизация успешна!');
+      log('✅ Авторизация успешна!');
       return true;
     }
 
@@ -73,6 +73,6 @@ export async function waitForAuth(browser: Browser, page: Page) {
     }
   }
 
-  log('⚠ Таймаут ожидания авторизации');
+  log('❌ Таймаут ожидания авторизации');
   return false;
 }
