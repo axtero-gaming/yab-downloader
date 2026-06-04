@@ -69,13 +69,13 @@ try {
 await moveReaderToStart(page);
 
 // Выгрузка метаинфы по книге
-await loadBookInfo(bookId, page);
+const bookInfo = await loadBookInfo(bookId, page);
 
 // Выгрузка страниц по книге
 const pages = await loadBookPages(bookId, page);
 if (!isNil(pages)) {
   await buildHTMLBookFile(bookId, pages);
-  await buildEpubBookFile(bookId, pages);
+  await buildEpubBookFile(bookId, pages, bookInfo);
 }
 
 log(`Закрытие браузера`);

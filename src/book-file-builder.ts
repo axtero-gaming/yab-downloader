@@ -1,8 +1,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import epub from 'epub-gen-memory';
+import { EPub } from 'epub-gen-memory';
 import { log } from './utils/utils';
-import { BookPage } from './shared/types';
+import { BookInfo, BookPage } from './shared/types';
 import { buildBookFolderPath } from './utils/book.utils';
 
 /**
@@ -38,13 +38,20 @@ export async function buildHTMLBookFile(bookId: string, pages: BookPage[]) {
 /**
  * По-этапно выгружает содержимое книги.
  */
-export async function buildEpubBookFile(bookId: string, pages: BookPage[]) {
+export async function buildEpubBookFile(bookId: string, pages: BookPage[], bookInfo?: BookInfo) {
   const bookPath = buildBookFolderPath(bookId);
+  const largeCoverFilePath = path.resolve(bookPath, 'large-cover.jpeg');
   const epubFilePath = path.resolve(bookPath, 'book.epub');
   log(`Сохранение содержимого в EPUB файл:`, epubFilePath);
 
-  const result = await (epub as any).default(
-    { title: '' },
+  const epub = new EPub(
+    {
+      title: bookInfo?.title ?? '',
+      description: bookInfo?.annotation,
+      author: bookInfo?.authors,
+      publisher: bookInfo?.publishers?.[0]?.name,
+      cover: `file://${largeCoverFilePath}`,
+    },
     pages.map((page) => {
       return {
         title: '',
@@ -52,6 +59,8 @@ export async function buildEpubBookFile(bookId: string, pages: BookPage[]) {
       };
     }),
   );
+
+  const result = await epub.genEpub();
 
   await fs.writeFile(epubFilePath, Buffer.from(result));
 }

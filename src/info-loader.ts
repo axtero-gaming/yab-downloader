@@ -46,4 +46,6 @@ export async function loadBookInfo(bookId: string, page: Page) {
       await saveBase64Image(bookId, smallCoverImgBase64, `small-cover`, false);
     }
   }
+
+  return bookInfo;
 }
