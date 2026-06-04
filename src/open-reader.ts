@@ -11,14 +11,6 @@ export async function openReader(bookLink: string, page: Page) {
   await sleep({ seconds: 2 });
   await page.goto(bookLink, { waitUntil: 'domcontentloaded', timeout: milliseconds({ seconds: 30 }) });
 
-  const dimensions = await page.evaluate(() => {
-    return {
-      width: window.innerWidth,
-      height: window.innerHeight,
-    };
-  });
-  page.setViewport({ width: 1020, height: dimensions.height });
-
   await sleep({ seconds: 1 });
 
   log('Пробую открыть режим чтения (читатель)...');

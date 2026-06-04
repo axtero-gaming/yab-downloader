@@ -8,6 +8,7 @@ import { waitForAuth } from './auth';
 import { openReader } from './open-reader';
 import { moveReaderToStart } from './more-reader-to-start';
 import { loadCookies, saveCookies } from './browser.utils';
+import { loadBookPages } from './page-loader';
 
 const COOKIES_FILE_NAME = 'cookies_session.json';
 
@@ -53,10 +54,12 @@ await openReader(bookLink, page);
 await browser.waitForTarget((target) => target.url().startsWith('https://books.yandex.ru/reader'));
 await sleep({ seconds: 1 });
 
+const bookId = bookLink.split('/').slice(-1)[0];
+
 // Установка ридера в 0ю страницу.
 await moveReaderToStart(page);
 
-await sleep({ minutes: 1 });
+await loadBookPages(bookId, page);
 
 log(`Закрытие браузера`);
 await browser.close();

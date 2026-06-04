@@ -5,14 +5,18 @@ export interface DurationWithMilliseconds extends Duration {
   milliseconds?: number;
 }
 
-export function sleep(duration: DurationWithMilliseconds | number) {
+export function getDurationMs(duration: DurationWithMilliseconds | number) {
   let durationMs = 0;
   if (isNumber(duration)) {
     durationMs = duration;
   } else {
     durationMs = !isNil(duration.milliseconds) ? duration.milliseconds : milliseconds(duration);
   }
+  return durationMs;
+}
 
+export function sleep(duration: DurationWithMilliseconds | number) {
+  const durationMs = getDurationMs(duration);
   return new Promise((resolve) => setTimeout(resolve, durationMs));
 }
 
