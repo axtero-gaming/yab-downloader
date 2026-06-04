@@ -142,9 +142,10 @@ export async function loadBookPages(bookId: string, page: Page) {
       loadedPagesSet.set(lastPagination.id, lastPagination.content);
     }
 
-    if (lastPagination.page > 2) {
-      break;
-    }
+    // FYI: Если надо ограничить кол-во выгружаемых страниц.
+    // if (lastPagination.page > 2) {
+    //   break;
+    // }
 
     // Переходим на следующую страницу
     await clickNextPage(page);

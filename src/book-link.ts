@@ -1,4 +1,4 @@
-import { BrowserContext, Page } from 'puppeteer';
+import { Page } from 'puppeteer';
 import { milliseconds } from 'date-fns';
 import { isNil } from 'lodash-es';
 
@@ -7,7 +7,7 @@ import { log, sleep } from './utils/utils';
 /**
  * Получение ссылки из элемента ввода.
  */
-async function getBookLink(context: BrowserContext, page: Page) {
+async function getBookLink(page: Page) {
   const bookLinkEl = await page.$('input#bookLink');
   if (isNil(bookLinkEl)) {
     throw new Error(`Поле ввода для ссылки на книгу не найдено`);
@@ -22,7 +22,7 @@ async function getBookLink(context: BrowserContext, page: Page) {
 /**
  * Ожидание ссылки из элемента ввода.
  */
-export async function waitForBookLink(context: BrowserContext, page: Page) {
+export async function waitForBookLink(page: Page) {
   log(`Ожидание ссылки на книгу`);
 
   const BOOK_LINK_TIMEOUT = milliseconds({ minutes: 10 });
@@ -33,7 +33,7 @@ export async function waitForBookLink(context: BrowserContext, page: Page) {
     await sleep({ milliseconds: 300 });
     checkCount++;
 
-    const bookLink = await getBookLink(context, page);
+    const bookLink = await getBookLink(page);
     if (!isNil(bookLink)) {
       log('✅ Ссылка на книгу получена:', bookLink);
       return bookLink;

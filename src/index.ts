@@ -13,6 +13,7 @@ import { loadBookPages } from './page-loader';
 import { buildEpubBookFile, buildHTMLBookFile } from './book-file-builder';
 import { buildBookFolderPath } from './utils/book.utils';
 import { loadBookInfo } from './info-loader';
+import { waitForBookLink } from './book-link';
 
 const COOKIES_FILE_NAME = 'cookies_session.json';
 
@@ -39,8 +40,8 @@ page.on('close', async () => {
 // Получение ссылки на страницу с книгой
 const filePath = path.resolve(path.dirname(`.`), 'entry.html');
 await page.goto(`file://${filePath}`);
-// const bookLink = await waitForBookLink(context, page);
-const bookLink = `https://books.yandex.ru/books/V2Lfcler`;
+const bookLink = await waitForBookLink(page);
+// const bookLink = `https://books.yandex.ru/books/V2Lfcler`;
 
 // Навигация на главную страницу каталога (для проверки авторизации)
 log(`Открываю главную страницу Yandex Books для авторизации`);
