@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import epub from 'epub-gen-memory';
 import { BookPage } from './shared/types';
-import { buildBookFolderPath } from './utils';
+import { buildBookFolderPath } from './utils/book.utils';
 
 const bookPath = buildBookFolderPath(`V2Lfcler`);
 const filePath = path.resolve(bookPath, 'pages.json');

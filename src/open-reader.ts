@@ -1,6 +1,6 @@
 import { Page } from 'puppeteer';
 import { isNil } from 'lodash-es';
-import { log, sleep } from './utils';
+import { log, sleep } from './utils/utils';
 import { milliseconds } from 'date-fns';
 
 /**

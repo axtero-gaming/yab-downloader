@@ -1,7 +1,7 @@
 import { Browser, Page } from 'puppeteer';
 import { milliseconds } from 'date-fns';
 
-import { log, sleep } from './utils';
+import { log, sleep } from './utils/utils';
 
 const AUTH_TIMEOUT = milliseconds({ minutes: 5 });
 

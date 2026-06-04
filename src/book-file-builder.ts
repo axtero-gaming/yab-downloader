@@ -1,8 +1,9 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import epub from 'epub-gen-memory';
-import { buildBookFolderPath, log } from './utils';
+import { log } from './utils/utils';
 import { BookPage } from './shared/types';
+import { buildBookFolderPath } from './utils/book.utils';
 
 /**
  * По-этапно выгружает содержимое книги.

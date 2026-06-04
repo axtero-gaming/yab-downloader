@@ -1,5 +1,5 @@
 import { Page } from 'puppeteer';
-import { getRandom, sleep } from './utils';
+import { getRandom, log, sleep } from './utils/utils';
 import { isNil } from 'lodash-es';
 
 /**
@@ -21,6 +21,7 @@ export async function openSliderPanel(page: Page) {
  */
 export async function moveReaderToStart(page: Page) {
   try {
+    log('Переход на первую страницу книги');
     await sleep(1500);
 
     await openSliderPanel(page);

@@ -1,11 +1,10 @@
 import { Page } from 'puppeteer';
-import { buildBookFolderPath, getRandom, log, sleep } from './utils';
-import { waitForContentLoading } from './browser.utils';
+import { getRandom, log, sleep } from './utils/utils';
+import { waitForContentLoading } from './utils/browser.utils';
 import { isNil } from 'lodash-es';
-import fs from 'node:fs/promises';
-import path from 'node:path';
 import { openSliderPanel } from './more-reader-to-start';
 import { BookPage, Footnote } from './shared/types';
+import { loadBase64Image, saveBase64Image, saveContentToFile } from './utils/book.utils';
 
 let imageIndex = 0;
 
@@ -119,43 +118,6 @@ export async function clickNextPage(page: Page) {
 }
 
 /**
- * Сохраняет содержимое файла в папку книги.
- */
-async function saveContentToFile(bookId: string, fileName: string, content: string) {
-  const bookPath = buildBookFolderPath(bookId);
-  const filePath = path.resolve(bookPath, fileName);
-  await fs.mkdir(bookPath, { recursive: true });
-  await fs.writeFile(filePath, content, 'utf8');
-}
-
-/**
- * Переводит изображения в Base64 формате в файл.
- */
-async function saveBase64Image(bookId: string, base64Image: string, fileName: string) {
-  // Удаляем префикс и получаем тип файла
-  const matches = base64Image.match(/^data:image\/(\w+);base64,(.+)$/);
-  if (isNil(matches)) {
-    console.log(`Неопознанный формат изображения`);
-    return;
-  }
-
-  const imageType = matches[1]; // 'jpeg', 'png', 'gif' и т.д.
-  const base64Data = matches[2];
-
-  // Конвертируем в Buffer
-  const imageBuffer = Buffer.from(base64Data, 'base64');
-
-  const bookImagesPath = path.resolve(buildBookFolderPath(bookId), 'images');
-  const filePath = path.resolve(bookImagesPath, `${fileName}.${imageType}`);
-
-  // Сохраняем с правильным расширением
-  await fs.mkdir(bookImagesPath, { recursive: true });
-  await fs.writeFile(filePath, imageBuffer);
-  console.log(`Изображение сохранено как: ${filePath}`);
-  return filePath;
-}
-
-/**
  * По-этапно выгружает содержимое книги.
  */
 export async function loadBookPages(bookId: string, page: Page) {
@@ -219,21 +181,7 @@ export async function loadBookPages(bookId: string, page: Page) {
 
     await sleep(200);
 
-    const imgBase64 = await page.evaluate(async (imgSrc) => {
-      try {
-        const response = await fetch(imgSrc);
-        const blob = await response.blob();
-
-        return new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(blob);
-        });
-      } catch (error) {
-        console.error('Ошибка:', error);
-      }
-    }, imgSrc);
+    const imgBase64 = await loadBase64Image(page, imgSrc);
 
     if (!isNil(imgBase64)) {
       const imagePath = await saveBase64Image(bookId, imgBase64, `img-${imageIndex++}`);

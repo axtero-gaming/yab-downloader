@@ -4,13 +4,15 @@ import { isEmpty, isNil } from 'lodash-es';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 
-import { buildBookFolderPath, log, sleep } from './utils';
+import { log, sleep } from './utils/utils';
 import { waitForAuth } from './auth';
 import { openReader } from './open-reader';
 import { moveReaderToStart } from './more-reader-to-start';
-import { loadCookies, saveCookies } from './browser.utils';
+import { loadCookies, saveCookies } from './utils/browser.utils';
 import { loadBookPages } from './page-loader';
 import { buildEpubBookFile, buildHTMLBookFile } from './book-file-builder';
+import { buildBookFolderPath } from './utils/book.utils';
+import { loadBookInfo } from './info-loader';
 
 const COOKIES_FILE_NAME = 'cookies_session.json';
 
@@ -57,11 +59,19 @@ await browser.waitForTarget((target) => target.url().startsWith('https://books.y
 await sleep({ seconds: 1 });
 
 const bookId = bookLink.split('/').slice(-1)[0];
-await fs.rm(buildBookFolderPath(bookId), { recursive: true });
+try {
+  await fs.rm(buildBookFolderPath(bookId), { recursive: true });
+} catch (error) {
+  // Папки нет
+}
 
 // Установка ридера в 0ю страницу.
 await moveReaderToStart(page);
 
+// Выгрузка метаинфы по книге
+await loadBookInfo(bookId, page);
+
+// Выгрузка страниц по книге
 const pages = await loadBookPages(bookId, page);
 if (!isNil(pages)) {
   await buildHTMLBookFile(bookId, pages);

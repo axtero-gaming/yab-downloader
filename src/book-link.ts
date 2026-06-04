@@ -2,7 +2,7 @@ import { BrowserContext, Page } from 'puppeteer';
 import { milliseconds } from 'date-fns';
 import { isNil } from 'lodash-es';
 
-import { log, sleep } from './utils';
+import { log, sleep } from './utils/utils';
 
 /**
  * Получение ссылки из элемента ввода.
