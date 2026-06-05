@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { BookInfo, BookPage } from './shared/types';
 import { buildBookFolderPath } from './utils/book.utils';
-import { buildEpubBookFile } from './book-file-builder';
+import { buildFB2BookFile } from './book-file-builder';
 
 const bookId = `V2Lfcler`;
 const bookPath = buildBookFolderPath(bookId);
@@ -11,4 +11,4 @@ const pages: BookPage[] = JSON.parse(await fs.readFile(pagesFilePath, 'utf8'));
 const infoFilePath = path.resolve(bookPath, 'info.json');
 const bookInfo: BookInfo = JSON.parse(await fs.readFile(infoFilePath, 'utf8'));
 
-await buildEpubBookFile(bookId, pages, bookInfo);
+await buildFB2BookFile(bookId, pages, bookInfo);
