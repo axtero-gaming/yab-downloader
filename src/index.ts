@@ -10,7 +10,7 @@ import { openReader } from './open-reader';
 import { moveReaderToStart } from './more-reader-to-start';
 import { loadCookies, saveCookies } from './utils/browser.utils';
 import { loadBookPages } from './page-loader';
-import { buildEpubBookFile, buildHTMLBookFile } from './book-file-builder';
+import { buildEpubBookFile, buildFB2BookFile, buildHTMLBookFile } from './book-file-builder';
 import { buildBookFolderPath } from './utils/book.utils';
 import { loadBookInfo } from './info-loader';
 import { waitForBookLink } from './book-link';
@@ -77,6 +77,7 @@ const pages = await loadBookPages(bookId, page);
 if (!isNil(pages)) {
   await buildHTMLBookFile(bookId, pages);
   await buildEpubBookFile(bookId, pages, bookInfo);
+  await buildFB2BookFile(bookId, pages, bookInfo);
 }
 
 log(`Закрытие браузера`);

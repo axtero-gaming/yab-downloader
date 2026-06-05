@@ -21,7 +21,7 @@ export async function loadBookInfo(bookId: string, page: Page) {
   }, bookId);
 
   if (isNil(bookInfo)) {
-    return;
+    throw new Error(`❌ Не удалось выгрузить информацию о книге`);
   }
 
   log(`Сохранение информации о книге...`);
