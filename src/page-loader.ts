@@ -80,26 +80,26 @@ export async function clickNextPage(page: Page) {
   let clicked = false;
   const exactButton = await page.$('div.Pagination_pagination_forward__AENcl');
   if (exactButton) {
+    log(`Переход на следующую страницу. Нажатие на точную кнопку`);
     await page.evaluate(async (el) => {
       el.click();
     }, exactButton);
-
-    await exactButton.click();
     clicked = true;
   }
 
   if (!clicked) {
+    log(`Переход на следующую страницу. Нажатие на общую кнопку`);
     const genericButton = await page.$('div[class*="Pagination_pagination_forward"]');
     if (genericButton) {
       await page.evaluate(async (el) => {
         el.click();
       }, genericButton);
-      await genericButton.click();
       clicked = true;
     }
   }
 
   if (!clicked) {
+    log(`Переход на следующую страницу. Нажатие на по координатам`);
     const x = viewport.width * 0.92;
     const y = viewport.height * 0.5;
     await page.mouse.click(x, y);

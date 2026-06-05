@@ -39,7 +39,7 @@ export async function moveReaderToStart(page: Page) {
       throw new Error(`❌ Не удалось выставить прогресс в 0 для этой книги`);
     }
 
-    const sliderLeftX = sliderRect.x + 1;
+    const sliderLeftX = sliderRect.x;
     const sliderMidY = sliderRect.y + sliderRect.height / 2;
 
     await page.mouse.click(sliderLeftX, sliderMidY);
