@@ -1,7 +1,7 @@
 import { HTMLElement } from 'node-html-parser';
 
 export interface BookImage {
-  src?: string;
+  src: string;
 }
 
 export interface BookEpigraph {
