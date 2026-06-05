@@ -3,6 +3,9 @@ import { XMLBuilder } from 'xmlbuilder2/lib/interfaces';
 import { format } from 'date-fns';
 import { BookInfo, BookPage } from '../shared/types';
 
+/**
+ * Собирает title-info секцию FB2 книги.
+ */
 async function buildTitleInfo(descriptionEl: XMLBuilder, bookInfo: BookInfo) {
   const titleInfoEl = descriptionEl.ele('title-info');
 
@@ -26,6 +29,9 @@ async function buildTitleInfo(descriptionEl: XMLBuilder, bookInfo: BookInfo) {
   titleInfoEl.ele('src-lang').txt(bookInfo.language);
 }
 
+/**
+ * Собирает document-info секцию FB2 книги.
+ */
 async function buildDocumentInfo(descriptionEl: XMLBuilder, bookInfo: BookInfo) {
   const documentInfoEl = descriptionEl.ele('document-info');
 
@@ -44,6 +50,26 @@ async function buildDocumentInfo(descriptionEl: XMLBuilder, bookInfo: BookInfo) 
 }
 
 /**
+ * Собирает publish-info секцию FB2 книги.
+ */
+async function buildPublishInfo(descriptionEl: XMLBuilder, bookInfo: BookInfo) {
+  const publishInfoEl = descriptionEl.ele('publish-info');
+
+  publishInfoEl.ele('book-name').txt(bookInfo.title);
+
+  const publishers = bookInfo.publishers
+    .reduce((acc, publisher) => {
+      acc.push(publisher.name);
+      return acc;
+    }, [] as string[])
+    .join(`, `);
+  publishInfoEl.ele('publisher').txt(publishers);
+
+  const publicationDate = new Date(bookInfo.publication_date * 1000);
+  publishInfoEl.ele('year').txt(format(publicationDate, 'yyyy'));
+}
+
+/**
  * Собирает FB2 книгу
  */
 export async function buildFB2Book(bookInfo: BookInfo, pages: BookPage[]) {
@@ -55,6 +81,7 @@ export async function buildFB2Book(bookInfo: BookInfo, pages: BookPage[]) {
   const descriptionEl = bookEl.root().ele('description');
   await buildTitleInfo(descriptionEl, bookInfo);
   await buildDocumentInfo(descriptionEl, bookInfo);
+  await buildPublishInfo(descriptionEl, bookInfo);
 
   return bookEl.end({ prettyPrint: true });
 }
