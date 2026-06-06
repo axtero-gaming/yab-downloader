@@ -1,9 +1,12 @@
 .bookContent {
+  max-width: 720px;
   width: 100%;
   height: 100%;
   position: relative;
-  margin: 0;
-  padding: 0;
+  box-sizing: border-box;
+
+  margin: 0 auto;
+  padding: 0 24px;
   border: 0;
   background: transparent;
   -moz-column-fill: auto;
@@ -132,10 +135,6 @@
 .bookContent * {
   font-family: inherit;
   line-height: inherit;
-}
-
-.bookContent::-webkit-scrollbar {
-  display: none;
 }
 
 .bookContent a,
@@ -401,8 +400,6 @@ html {
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
   margin: 0;
   padding: 0;
-  -webkit-overflow-scrolling: touch;
-  overflow-x: hidden;
   overscroll-behavior: none;
 }
 
