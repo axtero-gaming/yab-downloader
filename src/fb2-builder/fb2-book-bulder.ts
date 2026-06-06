@@ -210,6 +210,36 @@ function insertHTMLForFB2(xmlEl: XMLBuilder, nodeEl: Node | HTMLElement, images:
       return;
     }
 
+    if (['h1', 'h2', 'h3', 'h4'].includes(tagName)) {
+      // Группируем внутренний контент по блокам (<br/> является разрывом между блоками)
+      let lastPBlock: Node[] = [];
+      const pBlocks: Node[][] = [lastPBlock];
+      for (const el of nodeEl.childNodes) {
+        const htmlEl = el as HTMLElement;
+        if (htmlEl.tagName === 'BR') {
+          lastPBlock = [];
+          pBlocks.push(lastPBlock);
+        } else {
+          lastPBlock.push(el);
+        }
+      }
+
+      // Каждый блок выводим как отдельный P элемент
+      // Пустые блоки выводим в виде p+empty-line
+      for (const pBlockEls of pBlocks) {
+        if (isEmpty(pBlockEls)) {
+          xmlEl.ele('p').ele('empty-line');
+        } else {
+          const rootEl = xmlEl.ele('p');
+          for (const el of pBlockEls) {
+            insertHTMLForFB2(rootEl, el, images);
+          }
+        }
+      }
+
+      return;
+    }
+
     if (tagName in xmlElementMap) {
       const value = xmlElementMap[tagName as keyof typeof xmlElementMap];
       const rootEl = xmlEl.ele(value);
