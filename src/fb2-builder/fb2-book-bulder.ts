@@ -166,6 +166,8 @@ function insertHTMLForFB2(xmlEl: XMLBuilder, nodeEl: Node | HTMLElement, images:
   }
 
   const xmlElementMap = {
+    code: 'code',
+    small: 'sup',
     strong: 'strong',
     b: 'strong',
     p: 'p',
@@ -186,7 +188,7 @@ function insertHTMLForFB2(xmlEl: XMLBuilder, nodeEl: Node | HTMLElement, images:
       return;
     }
 
-    if (['a', 'div'].includes(tagName)) {
+    if (['a', 'div', 'span'].includes(tagName)) {
       for (const el of nodeEl.childNodes) {
         insertHTMLForFB2(xmlEl, el, images);
       }
