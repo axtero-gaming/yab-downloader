@@ -8,7 +8,7 @@
   "main": "index.js",
   "scripts": {
     "load-book": "npx tsx ./src/main.ts",
-    "rebuild-books": "npx tsx ./src/rebuild-books.ts"
+    "rebuild-books": "tsx ./src/rebuild-books.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
@@ -19,6 +19,7 @@
     "eslint-plugin-prettier": "^5.5.4",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.25",
+    "tsx": "^4.22.4",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.49.0"
   },

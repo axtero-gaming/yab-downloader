@@ -175,6 +175,7 @@ function insertHTMLForFB2(xmlEl: XMLBuilder, nodeEl: Node | HTMLElement, images:
     h4: 'subtitle',
     h5: 'subtitle',
     i: 'emphasis',
+    em: 'emphasis',
     blockquote: 'cite',
   };
 

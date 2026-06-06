@@ -1,8 +1,74 @@
-import { HTMLElement, NodeType, parse } from 'node-html-parser';
-import { isNil } from 'lodash-es';
+import { HTMLElement, Node, NodeType, parse } from 'node-html-parser';
+import { isEmpty, isNil } from 'lodash-es';
 
 import { BookPage } from '../shared/types';
 import { BookBlock, BookBlockSegment, BookEpigraph } from './shared/types';
+
+/**
+ * Возвращает TRUE, если указанный узел является пустым текстовым узлом.
+ */
+function isEmptyNode(node: Node) {
+  return !isNil(node) && node.nodeType === NodeType.TEXT_NODE && node.textContent.trim() === '';
+}
+
+/**
+ * Удаляет пустые элементы из начала и конца контейнерных блоков.
+ */
+function trimElements(rootEl: HTMLElement) {
+  const nonProcessedNodes: Node[] = [rootEl];
+
+  while (!isEmpty(nonProcessedNodes)) {
+    const node = nonProcessedNodes.shift() as Node;
+    if (node.nodeType === NodeType.TEXT_NODE || isEmpty(node.childNodes)) {
+      continue;
+    }
+
+    let firstNode = node.childNodes[0];
+    while (isEmptyNode(firstNode)) {
+      firstNode.remove();
+      firstNode = node.childNodes[0];
+    }
+
+    let lastNode = node.childNodes[node.childNodes.length - 1];
+    while (isEmptyNode(lastNode)) {
+      lastNode.remove();
+      lastNode = node.childNodes[node.childNodes.length - 1];
+    }
+
+    nonProcessedNodes.push(...node.childNodes);
+  }
+}
+
+/**
+ * Перегруппировывает контент, чтобы не было DIV>DIV>DIV вложенности, убирая промежуточные
+ * DIV элементы. В результате останется 1 DIV или содержимое DIV если внутри 1 элемент.
+ */
+function removeExtraWrappers(rootEl: HTMLElement) {
+  const nonProcessedNodes: Node[] = [...rootEl.childNodes];
+
+  while (!isEmpty(nonProcessedNodes)) {
+    const node = nonProcessedNodes.shift() as Node;
+    if (node.nodeType === NodeType.TEXT_NODE) {
+      continue;
+    }
+
+    const htmlNode = node as HTMLElement;
+    if (htmlNode.childNodes.length !== 1) {
+      nonProcessedNodes.push(...htmlNode.childNodes);
+      continue;
+    }
+
+    const newRootNode = htmlNode.childNodes[0];
+    if (htmlNode.tagName === 'DIV') {
+      // Переносим всех детей в родительский узел
+      htmlNode.before(newRootNode);
+      // Удаляем пустой саб-узел
+      htmlNode.remove();
+    }
+
+    nonProcessedNodes.unshift(newRootNode);
+  }
+}
 
 /**
  * Собирает publish-info секцию FB2 книги.
@@ -17,15 +83,8 @@ export function convertPagesToFBBlocks(pages: BookPage[]) {
 
   let bookEls: HTMLElement[] = [];
   for (const contentContainer of contentContainers) {
-    if (contentContainer.classList.length === 1 && contentContainer.tagName !== 'H1') {
-      const imgTag = contentContainer.querySelector('img');
-
-      if (!isNil(imgTag)) {
-        imgTag.classList.add(`block-image`);
-        bookEls.push(imgTag);
-      }
-      continue;
-    }
+    trimElements(contentContainer);
+    removeExtraWrappers(contentContainer);
 
     if (contentContainer.tagName === `H1`) {
       contentContainer.classList.add(`block-title`);
@@ -47,6 +106,17 @@ export function convertPagesToFBBlocks(pages: BookPage[]) {
         }
       });
       bookEls = [...bookEls, ...childEls];
+      continue;
+    }
+
+    if (contentContainer.childNodes.length === 1) {
+      const firstChild = contentContainer.firstChild as HTMLElement;
+      if (firstChild.tagName === 'H1') {
+        firstChild.classList.add('block-title');
+      }
+      bookEls.push(firstChild);
+    } else {
+      bookEls.push(...(contentContainer.childNodes as HTMLElement[]));
     }
   }
 
@@ -120,7 +190,7 @@ export function convertPagesToFBBlocks(pages: BookPage[]) {
 
       if (bookEl.tagName === 'IMG') {
         lastSegment.img = {
-          src: bookEl?.getAttribute('src'),
+          src: bookEl?.getAttribute('src') ?? '',
         };
         continue;
       }
