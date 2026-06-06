@@ -92,6 +92,38 @@ export function insertHTMLForFB2(xmlEl: XMLBuilder, nodeEl: Node | HTMLElement, 
       return;
     }
 
+    const poemEl = nodeEl.querySelector('.Стихи');
+    if (!isNil(poemEl)) {
+      let lastStanza: HTMLElement[] = [];
+      const stanzas: HTMLElement[][] = [lastStanza];
+      let numOfBr = 0;
+      for (const el of poemEl.childNodes) {
+        const htmlEl = el as HTMLElement;
+        if (htmlEl.tagName === 'BR') {
+          numOfBr += 1;
+        } else {
+          lastStanza.push(htmlEl);
+          numOfBr = 0;
+        }
+
+        if (numOfBr > 1 && !isEmpty(lastStanza)) {
+          lastStanza = [];
+          stanzas.push(lastStanza);
+          numOfBr = 0;
+        }
+      }
+
+      const poemRootEl = xmlEl.ele('poem');
+      for (const stanza of stanzas) {
+        const stanzaRootEl = poemRootEl.ele('stanza');
+        for (const lineEl of stanza) {
+          const lineRootEl = stanzaRootEl.ele('v');
+          insertHTMLForFB2(lineRootEl, lineEl, images);
+        }
+      }
+      poemEl.remove();
+    }
+
     if (tagName in xmlElementMap) {
       const value = xmlElementMap[tagName as keyof typeof xmlElementMap];
       const rootEl = xmlEl.ele(value);
