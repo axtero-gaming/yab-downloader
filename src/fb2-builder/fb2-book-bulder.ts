@@ -3,18 +3,12 @@ import { XMLBuilder } from 'xmlbuilder2/lib/interfaces';
 import { format } from 'date-fns';
 import { isEmpty, isNil, uniqBy } from 'lodash-es';
 import fs from 'node:fs/promises';
-import path from 'node:path';
 
 import { BookInfo, BookPage } from '../shared/types';
 import { convertPagesToFBBlocks } from './yb-to-fb2-parser';
-import { HTMLElement, Node, NodeType } from 'node-html-parser';
 import { log } from '../utils/utils';
-import { buildBookFolderPath } from '../utils/book.utils';
-
-interface BinaryImage {
-  src: string;
-  name: string;
-}
+import { BinaryImage } from './shared/types';
+import { insertHTMLForFB2 } from './html-to-fb2-convertor';
 
 /**
  * Собирает title-info секцию FB2 книги.
@@ -88,7 +82,7 @@ async function buildPublishInfo(descriptionEl: XMLBuilder, bookInfo: BookInfo) {
 /**
  * Собирает publish-info секцию FB2 книги.
  */
-async function buildPages(bookId: string, bookEl: XMLBuilder, pages: BookPage[]) {
+async function buildPages(bookEl: XMLBuilder, pages: BookPage[]) {
   log(`Подготовка HTML контента для вставки в XML...`);
   const blocks = convertPagesToFBBlocks(pages);
 
@@ -154,109 +148,9 @@ async function buildPages(bookId: string, bookEl: XMLBuilder, pages: BookPage[])
 }
 
 /**
- * Вставляет HTML контент в указанных XML элемент.
- */
-function insertHTMLForFB2(xmlEl: XMLBuilder, nodeEl: Node | HTMLElement, images: BinaryImage[]) {
-  if (nodeEl.nodeType === NodeType.TEXT_NODE) {
-    const text = (nodeEl.textContent || '')?.trim();
-    if (!isEmpty(text)) {
-      xmlEl.txt(text);
-    }
-    return;
-  }
-
-  const xmlElementMap = {
-    code: 'code',
-    small: 'sup',
-    strong: 'strong',
-    b: 'strong',
-    p: 'p',
-    h1: 'p',
-    h2: 'p',
-    h3: 'p',
-    h4: 'subtitle',
-    h5: 'subtitle',
-    i: 'emphasis',
-    em: 'emphasis',
-    blockquote: 'cite',
-  };
-
-  if (nodeEl instanceof HTMLElement) {
-    const tagName = nodeEl.tagName.toLowerCase();
-    if (tagName === 'br') {
-      xmlEl.ele('empty-line');
-      return;
-    }
-
-    if (['a', 'div', 'span'].includes(tagName)) {
-      for (const el of nodeEl.childNodes) {
-        insertHTMLForFB2(xmlEl, el, images);
-      }
-      return;
-    }
-
-    if (['img'].includes(tagName)) {
-      const imgSrc = nodeEl.getAttribute('src');
-      if (isNil(imgSrc)) {
-        return;
-      }
-
-      const imgName = imgSrc.split(`/`).slice(-1)[0];
-      xmlEl.ele('image', { 'l:href': `#${imgName}` });
-      images.push({
-        src: imgSrc,
-        name: imgName,
-      });
-      return;
-    }
-
-    if (['h1', 'h2', 'h3', 'h4'].includes(tagName)) {
-      // Группируем внутренний контент по блокам (<br/> является разрывом между блоками)
-      let lastPBlock: Node[] = [];
-      const pBlocks: Node[][] = [lastPBlock];
-      for (const el of nodeEl.childNodes) {
-        const htmlEl = el as HTMLElement;
-        if (htmlEl.tagName === 'BR') {
-          lastPBlock = [];
-          pBlocks.push(lastPBlock);
-        } else {
-          lastPBlock.push(el);
-        }
-      }
-
-      // Каждый блок выводим как отдельный P элемент
-      // Пустые блоки выводим в виде p+empty-line
-      for (const pBlockEls of pBlocks) {
-        if (isEmpty(pBlockEls)) {
-          xmlEl.ele('p').ele('empty-line');
-        } else {
-          const rootEl = xmlEl.ele('p');
-          for (const el of pBlockEls) {
-            insertHTMLForFB2(rootEl, el, images);
-          }
-        }
-      }
-
-      return;
-    }
-
-    if (tagName in xmlElementMap) {
-      const value = xmlElementMap[tagName as keyof typeof xmlElementMap];
-      const rootEl = xmlEl.ele(value);
-      for (const el of nodeEl.childNodes) {
-        insertHTMLForFB2(rootEl, el, images);
-      }
-      return;
-    }
-
-    log(`Не вышло обработать тег при вставке HTML контента в XML:`, tagName);
-  }
-}
-
-/**
  * Собирает FB2 книгу
  */
-export async function buildFB2Book(bookId: string, bookInfo: BookInfo, pages: BookPage[]) {
+export async function buildFB2Book(bookInfo: BookInfo, pages: BookPage[]) {
   const bookEl = create({ encoding: 'utf-8' }).ele('FictionBook', {
     xmlns: 'http://www.gribuser.ru/xml/fictionbook/2.0',
     'xmlns:l': 'http://www.w3.org/1999/xlink',
@@ -267,7 +161,7 @@ export async function buildFB2Book(bookId: string, bookInfo: BookInfo, pages: Bo
   await buildDocumentInfo(descriptionEl, bookInfo);
   await buildPublishInfo(descriptionEl, bookInfo);
 
-  await buildPages(bookId, bookEl, pages);
+  await buildPages(bookEl, pages);
 
   return bookEl.end({ prettyPrint: true });
 }

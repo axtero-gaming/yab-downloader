@@ -75,7 +75,7 @@ export async function buildFB2BookFile(bookId: string, pages: BookPage[], bookIn
   const fb2FilePath = path.resolve(bookPath, 'book.fb2');
   log(`Сохранение содержимого в FB2 файл:`, fb2FilePath);
 
-  const fb2Book = await buildFB2Book(bookId, bookInfo, pages);
+  const fb2Book = await buildFB2Book(bookInfo, pages);
 
   await fs.mkdir(bookPath, { recursive: true });
   await fs.writeFile(fb2FilePath, fb2Book, 'utf8');

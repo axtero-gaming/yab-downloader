@@ -1,5 +1,10 @@
 import { HTMLElement } from 'node-html-parser';
 
+export interface BinaryImage {
+  src: string;
+  name: string;
+}
+
 export interface BookImage {
   src: string;
 }
