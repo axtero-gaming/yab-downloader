@@ -4,13 +4,13 @@ import { BookInfo, BookPage } from './shared/types';
 import { buildBookFolderPath } from './utils/book.utils';
 import { buildEpubBookFile, buildFB2BookFile, buildHTMLBookFile } from './book-file-builder';
 
-const bookId = `dcnbjwFA`;
+const bookId = `umxZslVi`;
 const bookPath = buildBookFolderPath(bookId);
 const pagesFilePath = path.resolve(bookPath, 'pages.json');
 const pages: BookPage[] = JSON.parse(await fs.readFile(pagesFilePath, 'utf8'));
 const infoFilePath = path.resolve(bookPath, 'info.json');
 const bookInfo: BookInfo = JSON.parse(await fs.readFile(infoFilePath, 'utf8'));
 
-await buildHTMLBookFile(bookId, pages);
+await buildHTMLBookFile(bookId, pages, bookInfo);
 await buildEpubBookFile(bookId, pages, bookInfo);
 await buildFB2BookFile(bookId, pages, bookInfo);

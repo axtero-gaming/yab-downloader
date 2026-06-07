@@ -3,17 +3,19 @@ import { XMLBuilder } from 'xmlbuilder2/lib/interfaces';
 import { format } from 'date-fns';
 import { isEmpty, isNil, uniqBy } from 'lodash-es';
 import fs from 'node:fs/promises';
+import path from 'node:path';
 
 import { BookInfo, BookPage } from '../shared/types';
 import { convertPagesToFBBlocks } from './yb-to-fb2-parser';
 import { log } from '../utils/utils';
 import { BinaryImage } from './shared/types';
 import { insertHTMLForFB2 } from './html-to-fb2-convertor';
+import { buildBookFolderPath } from '../utils/book.utils';
 
 /**
  * Собирает title-info секцию FB2 книги.
  */
-async function buildTitleInfo(descriptionEl: XMLBuilder, bookInfo: BookInfo) {
+async function buildTitleInfo(bookId: string, descriptionEl: XMLBuilder, bookInfo: BookInfo, images: BinaryImage[]) {
   log(`Вставки информации об книге в XML...`);
   const titleInfoEl = descriptionEl.ele('title-info');
 
@@ -31,7 +33,15 @@ async function buildTitleInfo(descriptionEl: XMLBuilder, bookInfo: BookInfo) {
 
   // Обложка
   const coverFormat = bookInfo.cover.large.split('?')[0].split('.').slice(-1);
-  titleInfoEl.ele('coverpage').ele('image', { 'l:href': `#cover.${coverFormat}` });
+  const coverImageName = `large-cover.${coverFormat}`;
+  titleInfoEl.ele('coverpage').ele('image', { 'l:href': `#${coverImageName}` });
+
+  const bookPath = buildBookFolderPath(bookId);
+  const fb2FilePath = path.resolve(bookPath, coverImageName);
+  images.push({
+    name: coverImageName,
+    src: fb2FilePath,
+  });
 
   titleInfoEl.ele('lang').txt(bookInfo.language);
   titleInfoEl.ele('src-lang').txt(bookInfo.language);
@@ -82,11 +92,9 @@ async function buildPublishInfo(descriptionEl: XMLBuilder, bookInfo: BookInfo) {
 /**
  * Собирает publish-info секцию FB2 книги.
  */
-async function buildPages(bookEl: XMLBuilder, pages: BookPage[]) {
+async function buildPages(bookEl: XMLBuilder, pages: BookPage[], images: BinaryImage[]) {
   log(`Подготовка HTML контента для вставки в XML...`);
   const blocks = convertPagesToFBBlocks(pages);
-
-  const images: BinaryImage[] = [];
 
   log(`Вставка HTML контента в XML...`);
   for (const block of blocks) {
@@ -130,6 +138,24 @@ async function buildPages(bookEl: XMLBuilder, pages: BookPage[]) {
       }
     }
   }
+}
+
+/**
+ * Собирает FB2 книгу
+ */
+export async function buildFB2Book(bookId: string, bookInfo: BookInfo, pages: BookPage[]) {
+  const bookEl = create({ encoding: 'utf-8' }).ele('FictionBook', {
+    xmlns: 'http://www.gribuser.ru/xml/fictionbook/2.0',
+    'xmlns:l': 'http://www.w3.org/1999/xlink',
+  });
+  const images: BinaryImage[] = [];
+
+  const descriptionEl = bookEl.ele('description');
+  await buildTitleInfo(bookId, descriptionEl, bookInfo, images);
+  await buildDocumentInfo(descriptionEl, bookInfo);
+  await buildPublishInfo(descriptionEl, bookInfo);
+
+  await buildPages(bookEl, pages, images);
 
   const uniqImages = uniqBy(images, 'name');
   for (const image of uniqImages) {
@@ -145,23 +171,6 @@ async function buildPages(bookEl: XMLBuilder, pages: BookPage[]) {
       })
       .txt(base64String);
   }
-}
-
-/**
- * Собирает FB2 книгу
- */
-export async function buildFB2Book(bookInfo: BookInfo, pages: BookPage[]) {
-  const bookEl = create({ encoding: 'utf-8' }).ele('FictionBook', {
-    xmlns: 'http://www.gribuser.ru/xml/fictionbook/2.0',
-    'xmlns:l': 'http://www.w3.org/1999/xlink',
-  });
-
-  const descriptionEl = bookEl.ele('description');
-  await buildTitleInfo(descriptionEl, bookInfo);
-  await buildDocumentInfo(descriptionEl, bookInfo);
-  await buildPublishInfo(descriptionEl, bookInfo);
-
-  await buildPages(bookEl, pages);
 
   return bookEl.end({ prettyPrint: true });
 }

@@ -9,9 +9,10 @@ import { buildFB2Book } from './fb2-builder/fb2-book-bulder';
 /**
  * Создаёт HTML книгу и сохраняет на диск.
  */
-export async function buildHTMLBookFile(bookId: string, pages: BookPage[]) {
+export async function buildHTMLBookFile(bookId: string, pages: BookPage[], bookInfo: BookInfo) {
   const bookPath = buildBookFolderPath(bookId);
-  const filePath = path.resolve(bookPath, `book.html`);
+  const bookFilesFolder = path.resolve(bookPath, 'books');
+  const filePath = path.resolve(bookFilesFolder, `${bookInfo.title}.html`);
   log(`Сохранение содержимого в HTML файл:`, filePath);
 
   const styleFilePath = path.resolve(path.dirname(`.`), 'book.css');
@@ -32,17 +33,18 @@ export async function buildHTMLBookFile(bookId: string, pages: BookPage[]) {
   </html>
   `;
 
-  await fs.mkdir(bookPath, { recursive: true });
+  await fs.mkdir(bookFilesFolder, { recursive: true });
   await fs.writeFile(filePath, htmlContent, 'utf8');
 }
 
 /**
  * Создаёт EPUB книгу и сохраняет на диск.
  */
-export async function buildEpubBookFile(bookId: string, pages: BookPage[], bookInfo?: BookInfo) {
+export async function buildEpubBookFile(bookId: string, pages: BookPage[], bookInfo: BookInfo) {
   const bookPath = buildBookFolderPath(bookId);
+  const bookFilesFolder = path.resolve(bookPath, 'books');
+  const epubFilePath = path.resolve(bookFilesFolder, `${bookInfo.title}.epub`);
   const largeCoverFilePath = path.resolve(bookPath, 'large-cover.jpeg');
-  const epubFilePath = path.resolve(bookPath, 'book.epub');
   log(`Сохранение содержимого в EPUB файл:`, epubFilePath);
 
   const epub = new EPub(
@@ -63,7 +65,7 @@ export async function buildEpubBookFile(bookId: string, pages: BookPage[], bookI
 
   const result = await epub.genEpub();
 
-  await fs.mkdir(bookPath, { recursive: true });
+  await fs.mkdir(bookFilesFolder, { recursive: true });
   await fs.writeFile(epubFilePath, Buffer.from(result));
 }
 
@@ -72,11 +74,12 @@ export async function buildEpubBookFile(bookId: string, pages: BookPage[], bookI
  */
 export async function buildFB2BookFile(bookId: string, pages: BookPage[], bookInfo: BookInfo) {
   const bookPath = buildBookFolderPath(bookId);
-  const fb2FilePath = path.resolve(bookPath, 'book.fb2');
+  const bookFilesFolder = path.resolve(bookPath, 'books');
+  const fb2FilePath = path.resolve(bookFilesFolder, `${bookInfo.title}.fb2`);
   log(`Сохранение содержимого в FB2 файл:`, fb2FilePath);
 
-  const fb2Book = await buildFB2Book(bookInfo, pages);
+  const fb2Book = await buildFB2Book(bookId, bookInfo, pages);
 
-  await fs.mkdir(bookPath, { recursive: true });
+  await fs.mkdir(bookFilesFolder, { recursive: true });
   await fs.writeFile(fb2FilePath, fb2Book, 'utf8');
 }

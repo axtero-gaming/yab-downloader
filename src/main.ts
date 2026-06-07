@@ -75,7 +75,7 @@ const bookInfo = await loadBookInfo(bookId, page);
 // Выгрузка страниц по книге
 const pages = await loadBookPages(bookId, page);
 if (!isNil(pages)) {
-  await buildHTMLBookFile(bookId, pages);
+  await buildHTMLBookFile(bookId, pages, bookInfo);
   await buildEpubBookFile(bookId, pages, bookInfo);
   await buildFB2BookFile(bookId, pages, bookInfo);
 }
